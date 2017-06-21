@@ -19,7 +19,7 @@ The tool performs two major functions: job queuing and job submission. The tool 
 
 Simply place the Cluster_submission.py and filelock.py files in the site-packages folder in your home directory on the cluster e.g. ~/.local/lib/python2.7/site-packages/
 
-### How To Use
+### Using The Tool
 
 I've written Cluster Submission primarily for working on stochastic simulations that need to be run several times independently. The jobs therefore best suited for use with Cluster Submission are of the "embarrassingly parallel" variety i.e. parallel jobs that don't need to communicate with each other. For non-embarrassingly parallel jobs, you're far better off using MPI or similar tools.
 
