@@ -50,9 +50,9 @@ You need to run que_jobs() every time you want to add new jobs to the queue. You
 
 ## License
 
-This project is licensed under the [GNU GPLv3](https://www.gnu.org/licenses/gpl-3.0.txt)
+This project is licensed under the [MIT License](LICENSE.txt)
 
 
 ## Acknowledgments
-- The enigma of the ever changing cluster job-scheduling policy by which all mortals must live and die
+- The enigma of the ever changing cluster job-scheduling policy by which we all must live and die
 - Coffee
