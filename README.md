@@ -50,7 +50,7 @@ You need to run que_jobs() every time you want to add new jobs to the queue. You
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE.txt)
+This project is licensed under the [MIT License](LICENSE.txt).
 
 
 ## Acknowledgments
