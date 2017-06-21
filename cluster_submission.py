@@ -3,22 +3,22 @@ from copy import deepcopy
 from glob import glob
 
 def que_jobs(job_path, nu_jobs, walltime):
-	tbird_que_path = os.path.join(os.path.expanduser('~'),'tbird_que.pickle') #location of pickled que
-	tbird_que = [] #will contain contents of que
-	if os.path.isfile(tbird_que_path): #load que
-		with filelock.FileLock(tbird_que_path+'.lock'): tbird_que += cPickle.load(open(tbird_que_path, 'rb')) #que = [{'py_path': '~/wewe/wew.py', 'jobs': 1000, 'walltime': '20:00:00'}, {}, {}]
+	cluster_que_path = os.path.join(os.path.expanduser('~'),'cluster_que.pickle') #location of pickled que
+	cluster_que = [] #will contain contents of que
+	if os.path.isfile(cluster_que_path): #load que
+		with filelock.FileLock(cluster_que_path+'.lock'): cluster_que += cPickle.load(open(cluster_que_path, 'rb')) #que = [{'py_path': '~/wewe/wew.py', 'jobs': 1000, 'walltime': '20:00:00'}, {}, {}]
 	new_jobs = [{'job_path': os.path.abspath(os.path.join(root, fil)), 'nu_jobs': nu_jobs, 'walltime': walltime} for root, dirs, files in os.walk('.') for fil in files if fnmatch.fnmatch(os.path.normpath(os.path.join(root, fil)), os.path.normpath(job_path))]
-	tbird_que += new_jobs #append new jobs to que
-	with filelock.FileLock(tbird_que_path+'.lock'): cPickle.dump(tbird_que, open(tbird_que_path, 'wb')) #save que
-	print 'Successfully added these job(s) to ' + tbird_que_path + ': ' + str(new_jobs)
+	cluster_que += new_jobs #append new jobs to que
+	with filelock.FileLock(cluster_que_path+'.lock'): cPickle.dump(cluster_que, open(cluster_que_path, 'wb')) #save que
+	print 'Successfully added these job(s) to ' + cluster_que_path + ': ' + str(new_jobs)
 
-def tbird_submitter(max_jobs = 100, minutes_between_submissions = 10):
+def cluster_submitter(max_jobs = 400, minutes_between_submissions = 1):
 	def nu_job_returns(job_path):
 		job_folder_path, job_name = os.path.split(job_path)
 		job_return_folder = os.path.join(job_folder_path, job_name[:-3]+'_data')
 		return len(['' for fil in os.listdir(job_return_folder) if fnmatch.fnmatch(fil, '*.csv')]) if os.path.isdir(job_return_folder) else 0
 
-	def qsub(job): #create and run tbird.sh script for job submission
+	def qsub(job): #create and run cluster.sh script for job submission
 		this_dir = os.getcwd()
 		job_folder_path, job_name = os.path.split(job['job_path'])
 		os.chdir(job_folder_path)
@@ -31,7 +31,7 @@ def tbird_submitter(max_jobs = 100, minutes_between_submissions = 10):
 		cd $PBS_O_WORKDIR
 		#
 		python '''+job_name+''' ${PBS_JOBID}'''
-		submit_file_name = 'tbird_submit_' + job_name + '.sh'
+		submit_file_name = 'cluster_submit_' + job_name + '.sh'
 		with open(submit_file_name, 'w') as f:
 			f.write(sh_content)
 		os.system('qsub -t 1-' + str(job['nu_jobs']) + ' ' + submit_file_name)
@@ -77,15 +77,15 @@ def tbird_submitter(max_jobs = 100, minutes_between_submissions = 10):
 		for job_nu in completed_job_nus: #removing completed jobs info
 			jobs_running_info['jobs'].pop(job_nu)
 
-	def submit_jobs(nu_jobs, tbird_que, jobs_running_info):
+	def submit_jobs(nu_jobs, cluster_que, jobs_running_info):
 		fully_subbed_job_nus = []
-		for job_nu in range(len(tbird_que)):
-			job_in_que = deepcopy(tbird_que[job_nu])
+		for job_nu in range(len(cluster_que)):
+			job_in_que = deepcopy(cluster_que[job_nu])
 			if job_in_que['nu_jobs'] <= nu_jobs:
 				fully_subbed_job_nus = [job_nu] + fully_subbed_job_nus
 			else:
 				job_in_que['nu_jobs'] = nu_jobs
-				tbird_que[job_nu]['nu_jobs'] -= nu_jobs
+				cluster_que[job_nu]['nu_jobs'] -= nu_jobs
 			qsub(job_in_que)
 			nu_jobs -= job_in_que['nu_jobs']
 			jobs_running_info['nu_jobs'] += job_in_que['nu_jobs']
@@ -101,31 +101,31 @@ def tbird_submitter(max_jobs = 100, minutes_between_submissions = 10):
 			if nu_jobs == 0:
 				break
 		for job_nu in fully_subbed_job_nus: #deleting fully submitted jobs from que
-			tbird_que.pop(job_nu)
+			cluster_que.pop(job_nu)
 
 	def main(max_jobs, minutes_between_submissions):
-		tbird_que_path = os.path.join(os.path.expanduser('~'), 'tbird_que.pickle')
-		os.chdir(os.path.split(tbird_que_path)[0])
+		cluster_que_path = os.path.join(os.path.expanduser('~'), 'cluster_que.pickle')
+		os.chdir(os.path.split(cluster_que_path)[0])
 		jobs_running_info = {'jobs': [], 'nu_jobs': 0, 'nu_resubbed': 0}
 		time_of_sub, killed_jobs_resubbed = 'Never', 'Never'
 		time_of_next_attempt = datetime.datetime.now()
 		nu_jobs_subbed = 0
-		tbird_que = [] #will contain contents of que
+		cluster_que = [] #will contain contents of que
 		while(True):
 			update_jobs_running_info(jobs_running_info)
 			workers_free = max_jobs - jobs_running_info['nu_jobs']
-			if os.path.isfile(tbird_que_path): #load que
-				with filelock.FileLock(tbird_que_path+'.lock'): tbird_que = cPickle.load(open(tbird_que_path, 'rb'))
+			if os.path.isfile(cluster_que_path): #load que
+				with filelock.FileLock(cluster_que_path+'.lock'): cluster_que = cPickle.load(open(cluster_que_path, 'rb'))
 			time_of_attempt = time_of_next_attempt
-			if len(tbird_que) > 0 and workers_free > 0:
+			if len(cluster_que) > 0 and workers_free > 0:
 				nu_running_original = jobs_running_info['nu_jobs']
-				submit_jobs(workers_free, tbird_que, jobs_running_info)
-				with filelock.FileLock(tbird_que_path+'.lock'): cPickle.dump(tbird_que, open(tbird_que_path, 'wb'))
+				submit_jobs(workers_free, cluster_que, jobs_running_info)
+				with filelock.FileLock(cluster_que_path+'.lock'): cPickle.dump(cluster_que, open(cluster_que_path, 'wb'))
 				nu_jobs_subbed = jobs_running_info['nu_jobs'] - nu_running_original
 				time_of_sub = time_of_attempt
 			print '\n\n-----------------------------'
 			print '\nJobs running: ' + str(jobs_running_info['nu_jobs']) + ' of ' + str(max_jobs) + ' max jobs'
-			print '\nJobs awaiting submission: '+ str(sum([job['nu_jobs'] for job in tbird_que]))
+			print '\nJobs awaiting submission: '+ str(sum([job['nu_jobs'] for job in cluster_que]))
 			print '\nLast new submission: ' + str(nu_jobs_subbed) + ' jobs at ' + str(time_of_sub)
 			if jobs_running_info['nu_resubbed'] > 0:
 				killed_jobs_resubbed = str(jobs_running_info['nu_resubbed']) + ' jobs at ' + str(time_of_attempt)
