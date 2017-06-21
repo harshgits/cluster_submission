@@ -24,7 +24,7 @@ Simply place the Cluster_submission.py and filelock.py files in the site-package
 
 I've written Cluster Submission primarily for myself and other individuals working on stochastic simulations that need to be run several times independently. The jobs therefore best suited for use with Cluster Submission are of the "embarrassingly parallel" variety i.e. parallel jobs that don't need to communicate with each other. For non-embarrassingly parallel jobs, you're far better off using MPI or similar tools.
 
-We will now demonstrate the use of the module with a test. In a new terminal on the cluster, navigate to the test/ folder provided with this installation. Launch the Python interpreter in a screen with the "screen python" (no quotes) command. Run the following code in the interpreter to start the submitter.
+We will now demonstrate the use of the module with a test. In a new terminal on the cluster, navigate to the test/ folder provided with this installation. Launch the Python interpreter in a screen with the <code>screen python</code> command. Run the following code in the interpreter to start the submitter.
 
 ```
 from cluster_submission import cluster_submitter
