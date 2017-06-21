@@ -3,8 +3,9 @@
 Cluster Submission is a tool I made to automate the submission of jobs to computer clusters. Its purpose is to maximize the capacity utilization of a fixed number of CPU cores. It does so by actively monitoring user jobs running on the cluster and dynamically submitting new jobs to the cluster whenever previously submitted jobs complete execution. It also automatically re-submits jobs that were submitted to the cluster but were killed i.e. weren't allowed to run to completion.
 
 The tool performs two major functions: job queuing and job submission. The tool is a Python module and the two functions are implemented in the module literally as functions viz. que_jobs() and cluster_submitter().
-- que_jobs() is used to submit new jobs to the job queue that is stored in the user's home directory in a file cluster_que.pickle
+- que_jobs() is used to submit new jobs to the job queue that is stored in the user's home directory in a file named cluster_que.pickle
 - cluster_submitter() grabs jobs from this queue and submits them to the cluster
+
 
 ## Getting Started
 
@@ -14,11 +15,9 @@ The tool performs two major functions: job queuing and job submission. The tool 
 - Any [Anaconda Python 2.7.x](https://www.continuum.io/downloads) distribution
 - The [filelock](https://pypi.python.org/pypi/filelock) module (included)
 
-
 ### Installing
 
 Simply place the Cluster_submission.py and filelock.py files in the site-packages folder in your home directory on the cluster e.g. ~/.local/lib/python2.7/site-packages/
-
 
 ### How To Use
 
@@ -40,6 +39,20 @@ from cluster_submission import que_jobs
 que_jobs(job_path = 'test_job.py', nu_jobs = 1000, walltime = '00:01:00')
 ```
 
-Each run of test_job.py should take about 15 seconds to complete but we've specified a walltime of 1 minute to account for overheads such as import time etc. This code should submit 1000 jobs of test_job.py to the queue. cluster_submitter() will "grab" 400 of these and submit them to the cluster for execution via PBS. It will check for completed jobs once every minute by looking for output files in the test_job_data/ folder. Whenever it notices completed jobs, it will grab that many new jobs from the queue and submit them to the cluster. If any jobs get killed mid execution, it will automatically resubmit these. If everything works as it should, and the cluster isn't already running at capacity, you should have 1000 data files back in the data folder in a couple of minutes.
+Each run of test_job.py should take about 15 seconds to complete but we've specified a walltime of 1 minute to account for overheads such as import time etc. This code should submit 1000 jobs of test_job.py to the queue. cluster_submitter() will "grab" 400 of these and submit them to the cluster for execution via PBS. It will check for completed jobs once every minute by looking for output (.csv) files in the test_job.py_data/ folder. When deploying, you may customize this behavior by modifying the nu_job_returns() function in the module. Whenever cluster_submitter() notices some jobs have completed, it will grab that many new jobs from the queue and submit them to the cluster. If any jobs get killed mid execution, it will automatically resubmit these after the specified walltime. If everything works as it should, and the cluster isn't already running at capacity, you should have 1000 data files back in the data folder in a couple of minutes.
 
 You need to run que_jobs() every time you want to add new jobs to the queue. You only need to run cluster_submitter() once and let it run in the background.
+
+
+## Authors
+**Harsh Chaturvedi**
+
+
+## License
+
+This project is licensed under the [GNU GPLv3](https://www.gnu.org/licenses/gpl-3.0.txt)
+
+
+## Acknowledgments
+- The enigma of the ever changing cluster job-scheduling policy by which all mortals must live and die
+- Coffee

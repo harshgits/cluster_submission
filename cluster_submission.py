@@ -1,3 +1,24 @@
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+'''
+Cluster Submission is a tool I made to automate the submission of jobs to computer clusters. Its purpose is to maximize the capacity utilization of a fixed number of CPU cores. It does so by actively monitoring user jobs running on the cluster and dynamically submitting new jobs to the cluster whenever previously submitted jobs complete execution. It also automatically re-submits jobs that were submitted to the cluster but were killed i.e. weren't allowed to run to completion.
+
+The tool performs two major functions: job queuing and job submission. The tool is a Python module and the two functions are implemented in the module literally as functions viz. que_jobs() and cluster_submitter().
+- que_jobs() is used to submit new jobs to the job queue that is stored in the user's home directory in a file named cluster_que.pickle
+- cluster_submitter() grabs jobs from this queue and submits them to the cluster
+'''
+
 import os, time, datetime, fnmatch, filelock, cPickle
 from copy import deepcopy
 from glob import glob
@@ -15,7 +36,7 @@ def que_jobs(job_path, nu_jobs, walltime):
 def cluster_submitter(max_jobs = 400, minutes_between_submissions = 1):
 	def nu_job_returns(job_path):
 		job_folder_path, job_name = os.path.split(job_path)
-		job_return_folder = os.path.join(job_folder_path, job_name[:-3]+'_data')
+		job_return_folder = os.path.join(job_folder_path, job_name+'_data')
 		return len(['' for fil in os.listdir(job_return_folder) if fnmatch.fnmatch(fil, '*.csv')]) if os.path.isdir(job_return_folder) else 0
 
 	def qsub(job): #create and run cluster.sh script for job submission
@@ -44,7 +65,7 @@ def cluster_submitter(max_jobs = 400, minutes_between_submissions = 1):
 		for job_nu in range(len(jobs_running_info['jobs'])):
 			job = jobs_running_info['jobs'][job_nu] #job = {'job_path': assd, 'nu_jobs': 12, 'nu_returns': 5}
 			job_folder_path, job_name = os.path.split(job['job_path'])
-			job_return_folder = os.path.join(job_folder_path, job_name[:-3]+'_data')
+			job_return_folder = os.path.join(job_folder_path, job_name+'_data')
 
 			#updating job_submission_times by looking at log (.sh) files
 			for sh_file in [fil for fil in os.listdir(job_folder_path) if fnmatch.fnmatch(fil, '*' + job_name +'.sh*')]:

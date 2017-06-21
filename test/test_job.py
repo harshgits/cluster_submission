@@ -7,8 +7,8 @@ def main():
 	sleep(15) #sleep for 15 seconds
 
 	#saving a random number as the result
-	if not os.path.isdir(str(__file__)[:-3] + '_data'): os.makedirs(str(__file__)[:-3] + '_data')
-	savetxt(fname = os.path.join(str(__file__)[:-3] + '_data', str(__file__)[:-3] + '_' + str(sys.argv[-1]) + '_data.csv'), X = array([[random()]]), header = 'result', delimiter = ',', fmt = '%s', comments = '')
+	if not os.path.isdir(str(__file__) + '_data'): os.makedirs(str(__file__) + '_data')
+	savetxt(fname = os.path.join(str(__file__) + '_data', str(sys.argv[-1]) + '.csv'), X = array([[random()]]), header = 'result', delimiter = ',', fmt = '%s', comments = '')
 
 if __name__=='__main__':
     main()
