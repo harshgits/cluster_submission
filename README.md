@@ -1,4 +1,4 @@
-# Cluster Submission
+# Cluster Submission 
 
 Cluster Submission is a tool I made to automate the submission of jobs to computer clusters. Its purpose is to maximize the capacity utilization of a fixed number of CPU cores. It does so by actively monitoring user jobs running on the cluster and dynamically submitting new jobs to the cluster whenever previously submitted jobs complete execution. It also automatically re-submits jobs that were submitted to the cluster but were killed i.e. weren't allowed to run to completion.
 
@@ -13,11 +13,13 @@ The tool performs two major functions: job queuing and job submission. The tool 
 
 - A UNIX cluster that supports the use of PBS for job scheduling
 - Any [Anaconda Python 2.7.x](https://www.continuum.io/downloads) distribution
-- The [filelock](https://pypi.python.org/pypi/filelock) module (included)
 
 ### Installing
 
-Simply place the Cluster_submission.py and filelock.py files in the site-packages folder in your home directory on the cluster e.g. ~/.local/lib/python2.7/site-packages/
+ Installation does not require root access. After downloading the repository and extracting the files in it, run the following command from a terminal to install:
+ ```
+ python setup.py install --user
+ ```
 
 ### Using The Tool
 
