@@ -1,9 +1,10 @@
 from distutils.core import setup
 
 setup(
-    name='cluster_submission',
-    version='1.0',
-    py_modules=['cluster_submission', 'filelock'],
+    name = 'cluster_submission',
+    version = '1.0',
+    py_modules = ['cluster_submission'],
+    packages = ['portalocker'],
     description = 'Tool to automate submission of jobs to computer clusters',
     long_description = 
     '''
